@@ -1,0 +1,15 @@
+name: 'Asana Git'
+description: 'Asana Github Actions'
+inputs:
+  asana-pat:
+    description: 'Asana Public Access Token.'
+    required: true
+  comment-pr-link:
+    description: 'Send true to send the PR link to asana ticket.'
+    required: false
+  target-section:
+    description: 'Provide the name of section/column in which you want to move the ticket.'
+    required: false
+runs:
+  using: 'node12'
+  main: 'index.js'
