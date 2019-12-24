@@ -14,6 +14,10 @@ This action integrates asana with the github.
 
 **Required** Your public access token of asana, you can find it in [asana docs](https://developers.asana.com/docs/#authentication-basics).
 
+### `trigger-phrase`
+
+**Required** Prefix before the ticket i.e ASANA TICKET: https://app.asana.com/1/2/3/.
+
 ### `comment-pr-link`
 
 **Optional** If true it can comment the pull request created url to the relative asana ticket.

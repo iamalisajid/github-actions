@@ -10,6 +10,9 @@ inputs:
   target-section:
     description: 'Provide the name of section/column in which you want to move the ticket.'
     required: false
+  trigger-phrase:
+    description: 'Prefix before the ticket i.e ASANA TICKET: https://app.asana.com/1/2/3'
+    required: true
 runs:
   using: 'node12'
   main: 'index.js'

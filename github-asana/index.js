@@ -5,38 +5,44 @@ const asana = require('asana');
 const ASANA_PAT = core.getInput('asana-pat'),
     SECTION_NAME = core.getInput('target-section'),
     COMMENT_PR_LINK = core.getInput('comment-pr-link'),
+    TRIGGER_PHRASE = core.getInput('trigger-phrase'),
     PULL_REQUEST = github.context.payload.pull_request;
 
-async function asanaOperations(ticketId, projectId) {
+async function asanaOperations(ticketId, projectId, sectionName, commentPrLink) {
     const client = asana.Client.create({
         "defaultHeaders": {"asana-enable": "new-sections,string_ids"}
     }).useAccessToken(ASANA_PAT);
 
     try {
-        if(SECTION_NAME) {
-            let sections = await client.sections.findByProject(projectId);
-            let requiredSection = sections.find(data => data.name === SECTION_NAME);
-            if (requiredSection) {
-                await client.sections.addTask(section.gid, {task: ticketId});
-                console.info('Moved to:', requiredSection.name);
+        if (sectionName) {
+            let project = await client.sections.findByProject(projectId);
+            if (project) {
+                let requiredSection = project.find(data => data.name === sectionName);
+                if (requiredSection) {
+                    await client.sections.addTask(section.gid, {task: ticketId});
+                    core.info('Moved to:', requiredSection.name);
+                } else {
+                    core.info('Section not found.')
+                }
+            } else {
+                core.error('Project not found.')
             }
-            else{
-                console.info('Section not found.')
-            }
+
         }
-        if(COMMENT_PR_LINK === 'true') {
+        if (commentPrLink === 'true') {
             await client.tasks.addComment(ticketId, {
                 text: PULL_REQUEST.html_url
             });
-            console.log('PR Link Commented on ticket.');
+            core.info('PR Link Commented on ticket.');
         }
     } catch (ex) {
-        console.error(ex.value);
+        core.error(ex.value);
     }
 }
 
 try {
-    const regex = /\(https:\/\/app.asana.com\/(\d+)\/(\d+)\/(\d+).*?\)/;
+    const regex = new
+    RegExp(`\\*\\*${TRIGGER_PHRASE}:\\*\\* \\[.*?\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\/(\\d+)\\/(\\d+).*?\\)`);
     let ticketId = null;
     let projectId = null;
     const parseAsanaURL = regex.exec(PULL_REQUEST.body);
@@ -45,8 +51,8 @@ try {
         projectId = parseAsanaURL[2];
     }
     if (ticketId !== null) {
-        asanaOperations(ticketId, projectId)
+        asanaOperations(ticketId, projectId, SECTION_NAME, COMMENT_PR_LINK)
     }
 } catch (error) {
-    core.setFailed(error.message);
+    core.error(error.message);
 }
