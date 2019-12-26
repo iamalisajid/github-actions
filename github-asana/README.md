@@ -6,7 +6,7 @@ This action integrates asana with the github.
 ### Prerequisites
 
 - Asana account with the permission on the particular project you want to integrate with.
-- Must provide the ticket url in the PR description.
+- Must provide the task url in the PR description.
 
 ## Inputs
 
@@ -16,15 +16,15 @@ This action integrates asana with the github.
 
 ### `trigger-phrase`
 
-**Required** Prefix before the ticket i.e ASANA TICKET: https://app.asana.com/1/2/3/.
+**Required** Prefix before the task i.e ASANA TICKET: https://app.asana.com/1/2/3/.
 
 ### `comment-pr-link`
 
-**Optional** If true it can comment the pull request created url to the relative asana ticket.
+**Optional** If true it can comment the pull request created url to the relative asana task.
 
 ### `target-section`
 
-**Optional** Add/Move the ticket to the provided section i.e `merged`, `review`.
+**Optional** Add/Move the task to the provided section i.e `merged`, `review`.
 
 
 ## Example usage
