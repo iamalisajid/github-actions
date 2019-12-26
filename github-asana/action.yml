@@ -5,13 +5,13 @@ inputs:
     description: 'Asana Public Access Token.'
     required: true
   comment-pr-link:
-    description: 'Send true to send the PR link to asana ticket.'
+    description: 'Set to true to add a comment with the pull request link to the asana task.'
     required: false
   target-section:
-    description: 'Provide the name of section/column in which you want to move the ticket.'
+    description: 'Provide the name of an Asana projects section or column where you want to move the task.'
     required: false
   trigger-phrase:
-    description: 'Prefix before the ticket i.e ASANA TICKET: https://app.asana.com/1/2/3'
+    description: 'Prefix before the task i.e ASANA TICKET: https://app.asana.com/1/2/3'
     required: true
 runs:
   using: 'node12'

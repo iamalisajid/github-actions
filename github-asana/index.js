@@ -2,16 +2,11 @@ const core = require('@actions/core');
 const github = require('@actions/github');
 const asana = require('asana');
 
-const ASANA_PAT = core.getInput('asana-pat'),
-    SECTION_NAME = core.getInput('target-section'),
-    COMMENT_PR_LINK = core.getInput('comment-pr-link'),
-    TRIGGER_PHRASE = core.getInput('trigger-phrase'),
-    PULL_REQUEST = github.context.payload.pull_request;
 
-async function asanaOperations(ticketId, projectId, sectionName, commentPrLink) {
+async function asanaOperations(ticketId, projectId, sectionName, commentPrLink, asanaPAT) {
     const client = asana.Client.create({
         "defaultHeaders": {"asana-enable": "new-sections,string_ids"}
-    }).useAccessToken(ASANA_PAT);
+    }).useAccessToken(asanaPAT);
 
     try {
         if (sectionName) {
@@ -19,13 +14,13 @@ async function asanaOperations(ticketId, projectId, sectionName, commentPrLink) 
             if (project) {
                 let requiredSection = project.find(data => data.name === sectionName);
                 if (requiredSection) {
-                    await client.sections.addTask(section.gid, {task: ticketId});
+                    await client.sections.addTask(requiredSection.gid, {task: ticketId});
                     core.info('Moved to:', requiredSection.name);
                 } else {
-                    core.info('Section not found.')
+                    core.error("Asana section " + requiredSection + " not found.")
                 }
             } else {
-                core.error('Project not found.')
+                core.error("Asana project with id " + projectId + " not found.")
             }
 
         }
@@ -33,7 +28,7 @@ async function asanaOperations(ticketId, projectId, sectionName, commentPrLink) 
             await client.tasks.addComment(ticketId, {
                 text: PULL_REQUEST.html_url
             });
-            core.info('PR Link Commented on ticket.');
+            core.info("Added the pull request link to the Asana task.")
         }
     } catch (ex) {
         core.error(ex.value);
@@ -41,17 +36,22 @@ async function asanaOperations(ticketId, projectId, sectionName, commentPrLink) 
 }
 
 try {
-    const regex = new
-    RegExp(`\\*\\*${TRIGGER_PHRASE}:\\*\\* \\[.*?\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\/(\\d+)\\/(\\d+).*?\\)`);
-    let ticketId = null;
-    let projectId = null;
-    const parseAsanaURL = regex.exec(PULL_REQUEST.body);
+    const ASANA_PAT = core.getInput('asana-pat'),
+        SECTION_NAME = core.getInput('target-section'),
+        COMMENT_PR_LINK = core.getInput('comment-pr-link'),
+        TRIGGER_PHRASE = core.getInput('trigger-phrase'),
+        PULL_REQUEST = github.context.payload.pull_request,
+        REGEX = new
+        RegExp(`\\*\\*${TRIGGER_PHRASE}:\\*\\* \\[.*?\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\/(\\d+)\\/(\\d+).*?\\)`);
+    let ticketId = null, projectId = null;
+
+    const parseAsanaURL = REGEX.exec(PULL_REQUEST.body);
     if (parseAsanaURL != null && parseAsanaURL.length >= 3) {
         ticketId = parseAsanaURL[3];
         projectId = parseAsanaURL[2];
     }
     if (ticketId !== null) {
-        asanaOperations(ticketId, projectId, SECTION_NAME, COMMENT_PR_LINK)
+        asanaOperations(ticketId, projectId, SECTION_NAME, COMMENT_PR_LINK, ASANA_PAT)
     }
 } catch (error) {
     core.error(error.message);
