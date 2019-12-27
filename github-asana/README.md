@@ -1,7 +1,7 @@
 
 # Github-Asana action
 
-This action integrates asana with the github.
+This action integrates asana with github.
 
 ### Prerequisites
 
@@ -16,11 +16,11 @@ This action integrates asana with the github.
 
 ### `trigger-phrase`
 
-**Required** Prefix before the task i.e ASANA TICKET: https://app.asana.com/1/2/3/.
+**Required** Prefix before the task i.e ASANA TASK: https://app.asana.com/1/2/3/.
 
-### `comment-pr-link`
+### `task-comment`
 
-**Optional** If true it can comment the pull request created url to the relative asana task.
+**Optional** If any comment is provided, the action will add a comment to the specified asana task with the text & pull request link.
 
 ### `target-section`
 
@@ -34,5 +34,6 @@ uses: https://github.com/insurify/github-actions@master
 with:
   asana-pat: 'Your PAT'
   target-section: 'In Review'
-  comment-pr-link: true
+  task-comment: 'View Pull Request Here: '
+  trigger-phrase: 'Asana Task:'
 ```

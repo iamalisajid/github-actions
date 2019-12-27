@@ -4,8 +4,8 @@ inputs:
   asana-pat:
     description: 'Asana Public Access Token.'
     required: true
-  comment-pr-link:
-    description: 'Set to true to add a comment with the pull request link to the asana task.'
+  task-comment:
+    description: 'Provide text, which will add a comment with the pull request link to the asana task.'
     required: false
   target-section:
     description: 'Provide the name of an Asana projects section or column where you want to move the task.'
