@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const asana = require('asana');
 
 
-async function asanaOperations(asanaPAT, taskComment, projectId, taskId, sectionName, taskComment) {
+async function asanaOperations(asanaPAT, taskComment, projectId, taskId, sectionName) {
     const client = asana.Client.create({
         "defaultHeaders": {"asana-enable": "new-sections,string_ids"}
     }).useAccessToken(asanaPAT);
@@ -38,7 +38,6 @@ async function asanaOperations(asanaPAT, taskComment, projectId, taskId, section
 try {
     const ASANA_PAT = core.getInput('asana-pat'),
         SECTION_NAME = core.getInput('target-section'),
-        COMMENT_PR_LINK = core.getInput('comment-pr-link'),
         TRIGGER_PHRASE = core.getInput('trigger-phrase'),
         TASK_COMMENT = core.getInput('task-comment'),
         PULL_REQUEST = github.context.payload.pull_request,
@@ -55,7 +54,7 @@ try {
         taskComment = `${TASK_COMMENT} ${PULL_REQUEST}`
     }
     if (taskId !== null) {
-        asanaOperations(ASANA_PAT, taskComment, projectId, taskId, SECTION_NAME, COMMENT_PR_LINK)
+        asanaOperations(ASANA_PAT, taskComment, projectId, taskId, SECTION_NAME)
     }
 } catch (error) {
     core.error(error.message);
