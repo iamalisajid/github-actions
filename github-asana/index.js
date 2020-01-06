@@ -3,7 +3,7 @@ const github = require('@actions/github');
 const asana = require('asana');
 
 
-async function asanaOperations(asanaPAT, taskComment, projectId, taskId, sectionName) {
+async function asanaOperations(asanaPAT, projectId, taskId, sectionName, taskComment) {
     const client = asana.Client.create({
         "defaultHeaders": {"asana-enable": "new-sections,string_ids"}
     }).useAccessToken(asanaPAT);
@@ -54,7 +54,7 @@ try {
         taskComment = `${TASK_COMMENT} ${PULL_REQUEST}`
     }
     if (taskId !== null) {
-        asanaOperations(ASANA_PAT, taskComment, projectId, taskId, SECTION_NAME)
+        asanaOperations(ASANA_PAT, projectId, taskId, SECTION_NAME, taskComment)
     }
 } catch (error) {
     core.error(error.message);
