@@ -43,21 +43,20 @@ try {
         TASK_COMMENT = core.getInput('task-comment'),
         PULL_REQUEST = github.context.payload.pull_request,
         REGEX = new
-            RegExp(`\\*\\*${TRIGGER_PHRASE}\\*\\* \\[(?<title>.*?)\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\\/(?<project>\\d+)\\/(?<task>\\d+).*?\\)`, 'g');
-    let taskComment = null, parseAsanaURL;
+            RegExp(`\\*\\*${TRIGGER_PHRASE}\\*\\* \\[(.*?)\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\\/(?<project>\\d+)\\/(?<task>\\d+).*?\\)`, 'g');
+    let taskComment = null, parseAsanaURL = null;
+
+    if (TASK_COMMENT) {
+        taskComment = `${TASK_COMMENT} ${PULL_REQUEST.html_url}`
+    }
     while ((parseAsanaURL = REGEX.exec(PULL_REQUEST.body)) !== null) {
         let projectId = parseAsanaURL.groups.project,
             taskId = parseAsanaURL.groups.task;
         if (projectId && taskId) {
-            if (TASK_COMMENT) {
-                taskComment = `${TASK_COMMENT} ${PULL_REQUEST.html_url}`
-            }
-            core.info('ProjectId: '+ projectId);
-            core.info('TaskId: '+ taskId);
-            asanaOperations(ASANA_PAT, parseAsanaURL.groups.project, parseAsanaURL.groups.task, SECTION_NAME, taskComment);
+            asanaOperations(ASANA_PAT, projectId, taskId, SECTION_NAME, taskComment);
         }
         else{
-            core.error('TicketId/ProjectId cannot be parsed, kindly check your trigger-phrase.')
+            core.info('TicketId/ProjectId cannot be parsed, kindly check your trigger-phrase.')
         }
     }
 } catch (error) {
