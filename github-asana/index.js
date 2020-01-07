@@ -5,7 +5,8 @@ const asana = require('asana');
 
 async function asanaOperations(asanaPAT, projectId, taskId, sectionName, taskComment) {
     const client = asana.Client.create({
-        "defaultHeaders": {"asana-enable": "new-sections,string_ids"}
+        "defaultHeaders": { "asana-enable": "new-sections,string_ids" },
+        "logAsanaChangeWarnings": false
     }).useAccessToken(asanaPAT);
 
     try {
@@ -14,8 +15,8 @@ async function asanaOperations(asanaPAT, projectId, taskId, sectionName, taskCom
             if (project) {
                 let requiredSection = project.find(data => data.name === sectionName);
                 if (requiredSection) {
-                    await client.sections.addTask(requiredSection.gid, {task: taskId});
-                    core.info('Moved to:', requiredSection.name);
+                    await client.sections.addTask(requiredSection.gid, { task: taskId });
+                    core.info('Moved to: ' + requiredSection.name);
                 } else {
                     core.error("Asana section " + sectionName + " not found.")
                 }
@@ -42,19 +43,22 @@ try {
         TASK_COMMENT = core.getInput('task-comment'),
         PULL_REQUEST = github.context.payload.pull_request,
         REGEX = new
-        RegExp(`\\*\\*${TRIGGER_PHRASE}:\\*\\* \\[.*?\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\/(\\d+)\\/(\\d+).*?\\)`);
-    let taskId = null, projectId = null, taskComment = null;
-
-    const parseAsanaURL = REGEX.exec(PULL_REQUEST.body);
-    if (parseAsanaURL != null && parseAsanaURL.length >= 3) {
-        projectId = parseAsanaURL[2];
-        taskId = parseAsanaURL[3];
-    }
-    if (TASK_COMMENT) {
-        taskComment = `${TASK_COMMENT} ${PULL_REQUEST}`
-    }
-    if (taskId !== null) {
-        asanaOperations(ASANA_PAT, projectId, taskId, SECTION_NAME, taskComment)
+            RegExp(`\\*\\*${TRIGGER_PHRASE}\\*\\* \\[(?<title>.*?)\\]\\(https:\\/\\/app.asana.com\\/(\\d+)\\/(?<project>\\d+)\\/(?<task>\\d+).*?\\)`, 'g');
+    let taskComment = null, parseAsanaURL;
+    while ((parseAsanaURL = REGEX.exec(PULL_REQUEST.body)) !== null) {
+        let projectId = parseAsanaURL.groups.project,
+            taskId = parseAsanaURL.groups.task;
+        if (projectId && taskId) {
+            if (TASK_COMMENT) {
+                taskComment = `${TASK_COMMENT} ${PULL_REQUEST.html_url}`
+            }
+            core.info('ProjectId: '+ projectId);
+            core.info('TaskId: '+ taskId);
+            asanaOperations(ASANA_PAT, parseAsanaURL.groups.project, parseAsanaURL.groups.task, SECTION_NAME, taskComment);
+        }
+        else{
+            core.error('TicketId/ProjectId cannot be parsed, kindly check your trigger-phrase.')
+        }
     }
 } catch (error) {
     core.error(error.message);
