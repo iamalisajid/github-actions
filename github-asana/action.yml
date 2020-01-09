@@ -11,7 +11,7 @@ inputs:
     description: 'Provide the name of an Asana projects section or column where you want to move the task.'
     required: false
   trigger-phrase:
-    description: 'Prefix before the task i.e ASANA TICKET: https://app.asana.com/1/2/3'
+    description: 'Prefix before the task i.e ASANA TASK: https://app.asana.com/1/2/3'
     required: true
 runs:
   using: 'node12'
